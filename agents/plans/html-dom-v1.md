@@ -1034,7 +1034,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T7: A CSS selector parser producing a matchable AST
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T1
 **Documentation:** Implementation Approach, "Decisions" row 8
 
@@ -1148,12 +1148,53 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: `lib/selector-parser.js` — a hand-written recursive-descent
+  parser (`parseSelector`) over the documented grammar subset, an
+  `SelectorSyntaxError` class, and a capped (500-entry, wholesale-clear)
+  compiled-AST cache. `SelectorSyntaxError` is also exported from `mod.js`,
+  per the plan. Unit tests covering compounds, all four combinators, comma
+  lists, `:nth-*()` compilation, `:not()` with a selector-list argument,
+  every attribute operator plus the `i` flag, escaped identifiers, four
+  distinct syntax-error shapes, unsupported-construct error messages, and
+  cache identity/eviction.
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries:
+  - **Parse failures are a lightweight internal exception, not
+    `SelectorSyntaxError` directly.** Every `fail(message, position)` call
+    deep in the recursive-descent functions throws a private `ParseFailure`
+    carrying only `{message, position}` — none of those functions have the
+    original selector string in scope, and threading it through every
+    parameter list would obscure the grammar logic. `parseSelector()` is the
+    one place with the full string, so it wraps the whole parse in a
+    try/catch and rebuilds the public `SelectorSyntaxError(message,
+    selectorText, position)` there.
+  - **`:not()`/`:is()`/`:where()` accept full complex selectors in their
+    argument** (reusing `parseSelectorListInternal` rather than a
+    combinator-free compound-only parser), which is more permissive than
+    strict Selectors Level 3. No acceptance criterion exercises a combinator
+    inside `:not()`, and rejecting it would need a second, near-duplicate
+    parsing path for no tested benefit.
+  - Attribute selector names are lowercased at parse time (`[href]` and
+    `[HREF]` produce the same AST), matching how `Element` always stores its
+    own attribute names lowercase — T8's matcher never needs to special-case
+    selector-side casing for attribute names, only for tag names (where the
+    AST intentionally keeps `tag` lowercased and defers the
+    foreign-vs-HTML case-sensitivity call to T8, per the plan).
+  - Namespace syntax (`ns|div`) has no dedicated error message — it fails as
+    generic "unexpected trailing content," since `|` is not a compound
+    continuation character. The plan only requires it be rejected, not with
+    a specific message, unlike `:has()`/state pseudo-classes/pseudo-elements
+    which do get named messages.
+- Actual files changed: `lib/selector-parser.js` (new), `mod.js` (added the
+  `SelectorSyntaxError` export), `test/unit-tests/lib/selector-parser.test.js`
+  (new).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (134 tests
+  passing across the whole suite), `deno run --allow-read run-tests.js` (134
+  passing), `deno lint` (clean, 26 files), `npm pack --dry-run` (lib/
+  contents include selector-parser.js), plus manual smoke tests for every
+  grammar construct and the cache-eviction case before writing them up as
+  real tests.
 - Blockers: None.
 
 
