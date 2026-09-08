@@ -1,5 +1,5 @@
 {
-    "name": "html-dom",
+    "name": "parse-html-dom",
     "version": "1.0.0",
     "description": "Parse an HTML string into a virtual Document Object Model",
     "type": "module",
