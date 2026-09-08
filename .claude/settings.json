@@ -1,5 +1,11 @@
 {
   "includeGitInstructions": false,
   "respectGitignore": false,
-  "autoMemoryEnabled": false
+  "autoMemoryEnabled": false,
+  "attribution": {
+      "commit": "",
+      "pr": "",
+      "sessionUrl": false
+  }
 }
+
