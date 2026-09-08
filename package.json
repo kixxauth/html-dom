@@ -1,0 +1,33 @@
+{
+    "name": "html-dom",
+    "version": "1.0.0",
+    "description": "Parse an HTML string into a virtual [Document Object Model]",
+    "type": "module",
+    "engines": {
+        "node": ">=16.13.2"
+    },
+    "scripts": {
+        "test": "node run-linter.js && node run-tests.js",
+        "lint": "node run-linter.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/kixxauth/html-dom.git"
+    },
+    "keywords": [
+        "html",
+        "parser",
+        "dom"
+    ],
+    "author": "Kris Walker (www.kriswalker.me)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/kixxauth/html-dom/issues"
+    },
+    "homepage": "https://github.com/kixxauth/html-dom",
+    "devDependencies": {
+        "kixx-assert": "2.1.1",
+        "kixx-linting": "1.1.2",
+        "kixx-test": "3.0.0"
+    }
+}
