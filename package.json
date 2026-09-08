@@ -14,7 +14,7 @@
         "README.md"
     ],
     "engines": {
-        "node": ">=16.13.2"
+        "node": ">=18.3.0"
     },
     "scripts": {
         "test": "node run-linter.js && node run-tests.js",

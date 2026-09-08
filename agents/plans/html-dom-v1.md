@@ -1,7 +1,7 @@
 HTML DOM v1 Implementation Plan
 ===============================
 
-**Plan status:** Approved, not started
+**Plan status:** Complete — all ten tasks (T1-T10) done
 **Created:** 2026-09-08
 **Owner:** Kris Walker (kris@kixx.name)
 
@@ -1517,7 +1517,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T10: Documentation describes the package that was actually built
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T9
 **Documentation:** README.md, AGENTS.md, PUBLISHING.md
 
@@ -1611,12 +1611,66 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: All eleven findings from planning resolved:
+  1. README gained a Usage section (the plan's own worked example, verified
+     to run verbatim), a Supported API list, and a link to the plan's
+     conformance-boundary section rather than restating it.
+  2. Version floors corrected: README now says Node >= 18.3.0 (matching
+     `run-tests.js`'s `util.parseArgs()`) and Deno >= 1.42.0 (matching
+     `deno.json`'s `name`/`exports`/`publish` keys); `package.json`
+     `engines.node` updated to agree (`>=18.3.0`).
+  3. AGENTS.md's test-path examples corrected to `test/unit-tests/lib/...`.
+  4. AGENTS.md's `TODO` example rewritten without `TODO`, so it no longer
+     contradicts the project's own `no-warning-comments` rule.
+  5. AGENTS.md now says "three devDependencies," naming `kixx-linting` as
+     the one test files don't import directly.
+  6. AGENTS.md's two arrow-function examples now agree: both parenthesize a
+     single parameter.
+  7. PUBLISHING.md's runner path fixed to `deno run --allow-read
+     run-tests.js` (no `test/` prefix).
+  8. PUBLISHING.md's git tag command fixed to `git tag -a <tag> -m
+     <message>`.
+  9. PUBLISHING.md's `deno doc mod.js` review step was already present from
+     the original document; added a `tools/`-exclusion reminder to the
+     metadata-check step. Verified with `deno doc mod.js`: exit 0, no
+     warnings, and (checked via `deno doc --json`) all nine expected
+     symbols present — `parseHTML` plus the seven classes plus
+     `SelectorSyntaxError`.
+  10. `.gitignore`'s wrong "no dependencies" comment and its
+      `package-lock.json` rule both removed; the lockfile is now committed
+      (three devDependencies is exactly the case a lockfile is for).
+  11. `tmp/` — left alone; confirming with the user before removing
+      anything was the plan's own instruction, and the directory is
+      gitignored either way, so it costs nothing to leave for a future
+      session to ask about.
+- Current state: Done. This completes the v1 implementation plan — all ten
+  tasks are now marked Complete.
+- Remaining: Nothing.
+- Decisions and discoveries: Chose to commit `package-lock.json` rather than
+  keep ignoring it, since "decide whether to commit the lockfile" was framed
+  as an open choice in the finding, and a project with real devDependencies
+  is exactly the normal case for committing one (reproducible installs, no
+  reason not to). The on-disk lockfile before this task was stale: its root
+  package entry listed a runtime `"dependencies": { "sax": "^1.6.1" }` that
+  does not exist in `package.json` (which has never had a `dependencies`
+  field, only `devDependencies`) — almost certainly left over from the
+  `tmp/sax/` planning reference noted in finding 11. Ran `npm install
+  --package-lock-only` to regenerate it from the actual `package.json`
+  before committing, which removed the phantom `sax` entry. Flagging this
+  because a lockfile silently disagreeing with `package.json` is exactly the
+  kind of drift committing the lockfile is meant to prevent going forward.
+- Actual files changed: `README.md`, `AGENTS.md`, `PUBLISHING.md`,
+  `.gitignore`, `package.json` (`engines.node`), `package-lock.json` (newly
+  committed). No file under `lib/`, `mod.js`, or `test/` was touched.
+- Validation run: `npm run lint` and `node run-tests.js` (176 tests
+  passing), `deno run --allow-read run-tests.js` (176 passing), `deno lint`
+  (clean, 29 files), `deno doc mod.js` (exit 0, all symbols present),
+  `npm pack --dry-run` (file list unchanged from T9). Every command quoted
+  in README.md and PUBLISHING.md — `npm run lint`, `node run-tests.js`,
+  `node run-tests.js test/unit-tests/lib`, `node run-tests.js --skip
+  test/unit-tests/lib/config-loader.test.js`, `npm test`,
+  `deno run --allow-read run-tests.js`, `deno lint`, `deno doc mod.js` — was
+  run from the repository root and behaved as documented.
 - Blockers: None.
 
 

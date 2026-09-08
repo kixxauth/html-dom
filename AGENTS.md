@@ -56,7 +56,7 @@ Let the reader of the code breathe. Add empty lines between logical blocks of co
 Single-expression bodies go on one line:
 
 ```javascript
-[1, 2, 3].map(n => n * 10);
+[1, 2, 3].map((n) => n * 10);
 ```
 
 Multi-statement or complex bodies use a block on multiple lines:
@@ -209,8 +209,8 @@ const expiry = Math.floor(Date.now() / 1000) + (60 * 60 * 24);
 **Document Workarounds and Hacks**
 
 ```javascript
-// Workaround: Some legacy clients send timestamps as strings.
-// TODO: Remove this once all clients upgrade to v2.
+// Workaround: some legacy clients send timestamps as strings; remove this
+// once all clients upgrade to v2.
 const timestamp = typeof data.timestamp === 'string'
     ? parseInt(data.timestamp, 10)
     : data.timestamp;
@@ -415,10 +415,12 @@ export default class FileWatcher extends EventEmitter {}
 Unit Testing Guidelines
 -----------------------
 
-This project uses two ES module libraries installed in `node_modules/` and imported by bare module name:
+This project has three devDependencies installed in `node_modules/`. Test files import two of them by bare module name:
 
 - `kixx-test` provides the test runner API: `describe`, `it`, `before`, `after`, `xit`, `xdescribe`, and `MockTracker`.
 - `kixx-assert` provides assertion helpers. Assertions throw `AssertionError` on failure.
+
+The third, `kixx-linting`, powers `run-linter.js` and is not imported by test files.
 
 The project test runner imports test files first, which register top-level `describe` blocks, then executes the registered tests.
 
@@ -448,8 +450,8 @@ All assertion helpers from kixx-assert throw `AssertionError` on failure. A mess
 
 ### Test File Conventions
 
-- Name test files with the project convention `*.test.js`, for example `test/lib/config-loader.test.js`.
-- Mirror the source tree where practical: `lib/config-loader.js` is tested by `test/lib/config-loader.test.js`.
+- Name test files with the project convention `*.test.js`, for example `test/unit-tests/lib/config-loader.test.js`.
+- Mirror the source tree where practical: `lib/config-loader.js` is tested by `test/unit-tests/lib/config-loader.test.js`.
 - Use one top-level `describe` per test file, named after the module, class, or behavior under test.
 
 ### Basic Structure
