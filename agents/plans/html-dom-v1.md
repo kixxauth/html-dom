@@ -276,7 +276,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T2: HTML element categories and character reference decoding
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T1
 **Documentation:** Implementation Approach, "Conformance boundary"
 
@@ -404,12 +404,32 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: `lib/html-tags.js` with the seven category tables;
+  `tools/generate-character-references.js`; `lib/character-reference-table.js`
+  generated from `entities.json` (fetched via `curl` from
+  `https://html.spec.whatwg.org/entities.json`, 2231 entries); the decoder in
+  `lib/character-references.js`; unit tests for both modules.
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries: Both this project's decoder and the plan require
+  a trailing `;` on every reference (named and numeric), so the generated
+  table retains entries without a semicolon (matching entities.json's own key
+  set, for a byte-identical regeneration and the documented 2231-entry count)
+  even though the decoder never looks them up. Verified all 2231 entity names
+  are ASCII alphanumeric with a max length of 32, which is what makes the
+  "scan to the first `;`" approach in `decodeNamedReference` correct without
+  needing a trie or longest-match backtracking.
+- Actual files changed: `lib/html-tags.js` (new),
+  `lib/character-reference-table.js` (new, generated),
+  `lib/character-references.js` (new),
+  `tools/generate-character-references.js` (new),
+  `test/unit-tests/lib/html-tags.test.js` (new),
+  `test/unit-tests/lib/character-references.test.js` (new).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (25 tests
+  passing), `deno run --allow-read run-tests.js` (25 tests passing),
+  `deno lint` (clean, 10 files), `npm pack --dry-run` (lists `lib/`
+  contents but not `tools/`), and a byte-identical re-run of the generator
+  confirmed with `diff`.
 - Blockers: None.
 
 
