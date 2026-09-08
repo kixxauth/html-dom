@@ -737,7 +737,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T5: parseHTML turns a string into a Document
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T3, T4
 **Documentation:** Implementation Approach, "Conformance boundary"
 
@@ -849,12 +849,60 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: `lib/tree-builder.js` (a `TreeBuilder` class with an open-element
+  stack, implied `html`/`head`/`body`, the `AUTO_CLOSED_BY` auto-close loop,
+  foreign-content depth tracking for `svg`/`math`, and merged-text-node
+  insertion), `lib/parse-html.js` (argument validation, BOM/CRLF
+  preprocessing, and deferred line/column resolution for parse errors), and
+  `mod.js` filled in with the seven public exports. Unit tests for both new
+  modules asserting on tree shape (`children`, `tagName`, `textContent`),
+  never on serialized strings.
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries:
+  - **No separate "phase" enum.** Whether new content still routes into
+    `<head>` is derived on every call from `currentParent() === document.head
+    && !bodyOpened`, not tracked as independent state. An early draft used an
+    explicit `'before-html' | 'in-head' | 'in-body'` phase variable, and it
+    broke as soon as a `<title>` (a HEAD_ELEMENTS container that gets pushed
+    onto the stack) held non-whitespace text: the phase was still `'in-head'`
+    while the true insertion point was `title`, not `head`, so the "force
+    body open" logic popped `title` believing it was popping `head`. Deriving
+    the check from the stack itself makes it correct at any nesting depth
+    for free.
+  - **Line/column resolution lives in `parse-html.js`, not
+    `tree-builder.js`.** `buildTree()` returns `{document, errors}` with
+    unresolved `{code, message, offset}` records; the builder never touches
+    the source string, matching the Data Flow section's "the tree builder
+    never sees raw source." `parseHTML()` already owns the preprocessed
+    source for BOM/CRLF handling, so it also does the one-pass line-start
+    index and binary search, only when `errors.length > 0`.
+  - **End tag handling has no special case for `html`/`head`/`body`.** It is
+    the single generic "scan the stack for a matching name, pop through it"
+    algorithm from the plan, applied uniformly. `</head>` closing the head
+    falls out of this for free, because popping head changes what
+    `currentParent()` returns, which is the only thing the head/body routing
+    checks.
+  - Attribute name casing for foreign elements (e.g. `viewBox`) is preserved
+    in the `rawName` field passed through unchanged from the tokenizer into
+    `Element`'s internal attribute storage, but T4's public `attributes`
+    getter only exposes `{name, value}` (lowercase `name`) per the plan — so
+    this is verified in T5's tests via `getAttribute('viewBox')` and
+    `tagName`/`localName`; full round-trip casing is T6's serializer to
+    verify.
+  - A literal `<html attrs>` tag's attributes are preserved only when it is
+    the very first token to open `<html>`; a `<head>` tag's attributes are
+    always dropped, since a bare head is always implied immediately alongside
+    html. Neither is tested by the acceptance criteria; both are documented
+    pragmatic gaps rather than silent ones.
+- Actual files changed: `lib/tree-builder.js` (new), `lib/parse-html.js`
+  (new), `mod.js` (filled in), `test/unit-tests/lib/tree-builder.test.js`
+  (new), `test/unit-tests/lib/parse-html.test.js` (new).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (104 tests
+  passing across the whole suite), `deno run --allow-read run-tests.js` (104
+  passing), `deno lint` (clean, 22 files), `npm pack --dry-run` (lib/
+  contents include tree-builder.js and parse-html.js), and a manual
+  `deno run` smoke test importing `parseHTML` from `mod.js`.
 - Blockers: None.
 
 
