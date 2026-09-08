@@ -578,7 +578,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T4: The read-only node model
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T1
 **Documentation:** MDN Element and Document; Implementation Approach,
 "Deliberate deviations from the DOM"
@@ -703,12 +703,35 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: `lib/node.js` (`Node`, `ParentNode`, `CharacterData`, `Text`,
+  `Comment`), `lib/element.js` (`Element` plus private `AttributeList` and
+  `ClassList` helper classes), `lib/document.js` (`Document`). Structural
+  members, attribute access, `textContent`, `getElementsByTagName`,
+  `getElementsByClassName` all implemented. `querySelector`/
+  `querySelectorAll`/`closest` and `innerHTML`/`outerHTML` intentionally left
+  out for T8 and T6. Unit tests for all three modules, built via file-local
+  factories rather than `parseHTML` (which doesn't exist yet).
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries: `Node.parentElement` and `ParentNode.children`
+  check `nodeType === 1` rather than `instanceof Element`. An `instanceof`
+  check would need node.js to import element.js while element.js imports
+  `ParentNode` from node.js — a real circular top-level class `extends`,
+  which throws `ReferenceError: Cannot access 'ParentNode' before
+  initialization` the moment the two modules' evaluation order interleaves
+  unfavorably (verified this fails by trying it first). The `nodeType` check
+  avoids the cycle entirely and is exactly what a nodeType number is for.
+  `Document#setDoctype` freezes the doctype object defensively rather than
+  trusting T5's tree builder to pass an already-frozen one, since "doctype is
+  exposed as a frozen `{...}`" is this class's own invariant to hold.
+- Actual files changed: `lib/node.js` (new), `lib/element.js` (new),
+  `lib/document.js` (new), `test/unit-tests/lib/node.test.js` (new),
+  `test/unit-tests/lib/element.test.js` (new),
+  `test/unit-tests/lib/document.test.js` (new).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (76 tests
+  passing across the whole suite), `deno run --allow-read run-tests.js` (76
+  passing), `deno lint` (clean, 18 files), `npm pack --dry-run` (lib/
+  contents include the three new modules).
 - Blockers: None.
 
 
