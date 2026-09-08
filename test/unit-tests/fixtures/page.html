@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!--fixture header comment-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Page &amp; Title</title>
+<style>body { color: red; }</style>
+</head>
+<body>
+<p>Unclosed paragraph one
+<p>Unclosed paragraph two
+<ul>
+<li>Item one
+<li>Item two
+</ul>
+<table>
+<tr><td>Cell A</td><td>Cell B</td></tr>
+<tr><td>Cell C</td><td>Cell D</td></tr>
+</table>
+<svg viewBox="0 0 10 10"><path d="M0 0"/></svg>
+<script>
+var x = "</not-a-real-tag>";
+if (1 < 2 && x) { console.log(x & 1); }
+</script>
+<p class="lead intro">Named &amp; numeric &#65; and unknown &notaname; references.</p>
+<input type='text' name='q'>
+<input disabled>
+<input title="quote &quot; here">
+<textarea>Value with &amp; reference</textarea>
+</section>
+</body>
+</html>

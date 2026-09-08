@@ -1371,7 +1371,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T9: An end-to-end test over a realistic page
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T5, T6, T8
 **Documentation:** Implementation Approach, "Cross-cutting constraints"
 
@@ -1463,12 +1463,55 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: `test/unit-tests/fixtures/page.html` (doctype, a comment before
+  `<html>`, head with `meta`/`title` with a character reference/inline
+  `style`, unclosed `p` and `li` elements, a `table` with two `tr` rows and
+  no explicit `tbody`, an inline `svg` with `viewBox` and a self-closed
+  `path/`, an inline `script` with `<`, `&`, and a string that looks like an
+  end tag, named/numeric/unknown character references, single-quoted,
+  valueless, and entity-quoted attributes, a `textarea` with a character
+  reference, an element with two classes, and a stray `</section>`) and
+  `test/unit-tests/integration.test.js` (tree shape, parse errors,
+  round-trip, and selector-query assertions, all against that one parse).
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries:
+  - **"Implied `<tbody>` behavior" does not mean a synthesized `<tbody>`
+    node** — this codebase's conformance boundary only implies `html`/
+    `head`/`body`, nothing else (see T5's design notes and the plan's
+    conformance-boundary section, which lists `AUTO_CLOSED_BY` table-section
+    entries under "auto-close," not "implied tags"). The fixture's table has
+    no explicit `tbody`, and the test asserts what the engine actually
+    produces — `table.children` are `tr` elements directly — documented in
+    the test's own title ("...exercising the table auto-close rules") so a
+    future reader doesn't mistake this for a spec gap.
+  - Popping `<html>` via the end tag's generic scan-and-pop (no special case,
+    per T5's design) means content after `</html>` — here, the fixture's own
+    trailing newline — lands as a `Document` child rather than being
+    discarded, so `document.childNodes` has 3 entries (comment, html,
+    trailing whitespace text), not 2. The round-trip and tree-shape
+    assertions don't depend on that count, only on finding the comment by
+    `nodeType` and diffing `documentElement`'s own subtree structure, so this
+    was accounted for rather than special-cased away.
+  - The plan's illustrative "scope-vs-matching" example noted as a gap in
+    T8's handoff doesn't reappear here — the fixture's selector-query
+    assertions (descendant, child combinator, attribute, `:nth-child()`,
+    `closest()`) are all straightforward, uncontroversial cases.
+  - No defects surfaced in `lib/` while writing this test; every assertion
+    passed against the implementation as built once the fixture's actual
+    output was inspected (via a throwaway script) rather than predicted.
+- Actual files changed: `test/unit-tests/fixtures/page.html` (new),
+  `test/unit-tests/integration.test.js` (new). Also touched, as a genuine
+  prerequisite discovered while writing this test rather than as fixture
+  content: `eslint.config.js` (added `URL: 'readonly'` to
+  `languageOptions.globals` — the integration test's `new URL(...)` for
+  fixture path resolution was flagged `no-undef`, the same category of gap
+  T1 filled for `Date`/`setTimeout`).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (176 tests
+  passing across the whole suite), `deno run --allow-read run-tests.js` (176
+  passing — confirms the fixture path resolves and `node:fs`/`node:url`
+  work under Deno with just `--allow-read`), `deno lint` (clean, 29 files),
+  `npm pack --dry-run` (unchanged file list — test/ was never shipped).
 - Blockers: None.
 
 

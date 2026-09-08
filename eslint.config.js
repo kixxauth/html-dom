@@ -12,6 +12,7 @@ export default [
                 console: 'readonly',
                 Date: 'readonly',
                 setTimeout: 'readonly',
+                URL: 'readonly',
             },
         },
         rules: {
