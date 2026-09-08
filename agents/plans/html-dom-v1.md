@@ -1212,7 +1212,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T8: querySelector, querySelectorAll, and closest
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T4, T7
 **Documentation:** MDN Element.querySelector, Element.closest
 
@@ -1310,12 +1310,62 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: `lib/selector-matcher.js` (right-to-left compound/complex
+  matching, all four combinators, every attribute operator, the structural
+  pseudo-classes and their `:nth-*()` forms via a shared `matchesNth({a,b})`
+  helper, `:not()`/`:is()`/`:where()`, and an iterative document-order
+  descendant walk used by both `querySelector` and `querySelectorAll`).
+  Wired `querySelector`/`querySelectorAll` onto `ParentNode`
+  (`lib/node.js`, inherited by `Document` for free) and `closest` onto
+  `Element` (`lib/element.js`). Unit tests covering combinators (including
+  Text-node skipping for `+`/`~`), type-selector casing for HTML vs.
+  foreign elements, the real-tree-vs-scope matching rule, dedup + document
+  order across a selector list, every attribute operator, the structural
+  pseudo-classes, `:not()`/`:is()`/`:where()`, `closest()`, and
+  `SelectorSyntaxError` propagating from all three entry points.
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries:
+  - The plan's illustrative scope-vs-matching example — "`section.
+    querySelectorAll('body > p')` can match a `p` whose parent is outside
+    `section`" — doesn't actually parse as a coherent scenario: if `p`'s
+    real parent is `body` directly, `p` cannot simultaneously be a
+    descendant of `section` (a strict tree can't have it both ways). Rather
+    than ask about a documentation wording issue, I implemented the
+    underlying invariant the example was clearly gesturing at — combinator
+    matching walks the *real* tree with no boundary at the query root, so an
+    ancestor compound (like `body.theme`) can resolve to an element outside
+    the scope subtree even though the returned descendant is correctly
+    inside it — and wrote the test against that (see "matching evaluates
+    against the real tree" in `selector-matcher.test.js`), verified against
+    a scope-restricted alternative behavior it would NOT satisfy.
+  - `lib/selector-matcher.js` exports a `matches(element, selectorText)`
+    helper used internally by `:not()`/`:is()`/`:where()` (via
+    `matchesAnySelector`) but not wired onto `Element` — the plan's Scope
+    section for T8 only lists `querySelector`/`querySelectorAll`/`closest`
+    as the public surface, so an `Element.prototype.matches()` method was
+    not added.
+  - No import cycle: `selector-matcher.js` never imports `Element`, `Node`,
+    or `Document` — it only touches `nodeType`, `parentNode`,
+    `parentElement`, `children`, `childNodes`, `localName`, `rawName`,
+    `isForeign`, `id`, `getAttribute`, and `classList`, all duck-typed. Both
+    `node.js -> selector-matcher.js` and `element.js -> selector-matcher.js`
+    are one-directional, same pattern as `element.js -> serialize.js` in T6.
+    The imported `querySelector`/`querySelectorAll`/`closest` functions are
+    aliased on import (`as findFirstMatch` etc.) since the wrapping class
+    methods share the same name and a bare same-named call inside a method
+    body, while technically resolving correctly to the module-level import
+    over `this`, reads confusingly next to a method of the same name.
+- Actual files changed: `lib/selector-matcher.js` (new), `lib/node.js`
+  (edited: added the import and the two methods), `lib/element.js` (edited:
+  added the import and `closest`), `test/unit-tests/lib/selector-matcher.test.js`
+  (new).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (157 tests
+  passing across the whole suite), `deno run --allow-read run-tests.js` (157
+  passing), `deno lint` (clean, 28 files), `npm pack --dry-run` (lib/
+  contents include selector-matcher.js), plus manual smoke tests for every
+  combinator, attribute operator, and pseudo-class before writing them up as
+  real tests.
 - Blockers: None.
 
 
