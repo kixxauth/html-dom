@@ -435,7 +435,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T3: A tokenizer that turns an HTML string into a token stream
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T2
 **Documentation:** Implementation Approach, "Data flow" and "Conformance boundary"
 
@@ -546,12 +546,33 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: `lib/tokenizer.js` — a whole-string `tokenize()` generator with
+  `indexOf`-based scanning for text/comments/bogus-comments, and dedicated
+  scanners for doctypes, start tags (with attribute parsing and duplicate
+  detection), end tags, and raw text / RCDATA content; unit tests covering
+  casing, script/textarea content handling, literal `<`, duplicate
+  attributes, all three `eof-in-*` codes, bogus-comment codes, and
+  non-termination on adversarial input.
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries: The tokenizer decides whether a start tag opens
+  raw text / RCDATA content purely from the element name category
+  (`RAW_TEXT_ELEMENTS`/`RCDATA_ELEMENTS`), never from the `selfClosing` flag —
+  that flag is recorded but otherwise left for T5 to interpret, matching the
+  plan's "tokenizer does not know the element stack" invariant. An
+  unterminated start tag (`eof-in-tag`) yields only the `parseError`, not a
+  partial `startTag` token, since the tag was never actually well-formed; the
+  acceptance criteria only require the error code and termination, not a
+  half-built token. Verified by construction (see the `nextCursor` reasoning
+  in each scan function) that every branch's returned cursor strictly exceeds
+  the construct's start offset, which is what the "cursor strictly advances"
+  test checks structurally rather than via a timeout.
+- Actual files changed: `lib/tokenizer.js` (new),
+  `test/unit-tests/lib/tokenizer.test.js` (new).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (47 tests
+  passing across the whole suite), `deno run --allow-read run-tests.js` (47
+  passing), `deno lint` (clean, 12 files), `npm pack --dry-run` (lib/
+  contents include tokenizer.js, tools/ still excluded).
 - Blockers: None.
 
 
