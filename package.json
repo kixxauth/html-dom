@@ -1,8 +1,18 @@
 {
     "name": "html-dom",
     "version": "1.0.0",
-    "description": "Parse an HTML string into a virtual [Document Object Model]",
+    "description": "Parse an HTML string into a virtual Document Object Model",
     "type": "module",
+    "main": "./mod.js",
+    "exports": {
+        ".": "./mod.js"
+    },
+    "files": [
+        "lib/",
+        "mod.js",
+        "LICENSE",
+        "README.md"
+    ],
     "engines": {
         "node": ">=16.13.2"
     },

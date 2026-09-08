@@ -10,6 +10,8 @@ export default [
             sourceType: 'module',
             globals: {
                 console: 'readonly',
+                Date: 'readonly',
+                setTimeout: 'readonly',
             },
         },
         rules: {

@@ -10,7 +10,7 @@
             "mod.js",
             "README.md"
         ]
-    }
+    },
     "lint": {
         "exclude": [
             ".claude/",

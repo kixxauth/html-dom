@@ -178,7 +178,7 @@ Implementation Tasks
 
 ### Task T1: The linter passes and the package has a working entry point
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** None
 **Documentation:** README.md "Development"; PUBLISHING.md
 
@@ -256,12 +256,21 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: Added `Date`/`setTimeout` globals to `eslint.config.js`; fixed the
+  missing comma in `deno.json` before the `lint` key; added `main`, `exports`,
+  `files`, and a plain-prose `description` to `package.json`; created
+  `mod.js` with a `@module` JSDoc block and no exports; created
+  `test/unit-tests/.gitkeep` so `run-tests.js` has its expected root.
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries: `test/unit-tests/` did not exist yet, so it was
+  created here (needed for `node run-tests.js` to find its TEST_ROOT).
+- Actual files changed: `eslint.config.js`, `deno.json`, `package.json`,
+  `mod.js` (new), `test/unit-tests/.gitkeep` (new).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (0 tests, pass),
+  `deno run --allow-read run-tests.js` (0 tests, pass), `deno lint` (clean),
+  `node -e "JSON.parse(...)"` on `deno.json` (OK), `npm pack --dry-run`
+  (lists only `LICENSE`, `README.md`, `mod.js`, `package.json`).
 - Blockers: None.
 
 
