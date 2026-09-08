@@ -1186,6 +1186,18 @@ Record the actual files changed in the handoff notes.
     continuation character. The plan only requires it be rejected, not with
     a specific message, unlike `:has()`/state pseudo-classes/pseudo-elements
     which do get named messages.
+  - **Plan gap found and resolved with the user while starting T8:** the
+    plan's Compound shape said `tag` is stored lowercased, with T8 applying
+    case-sensitivity — but a lowercased-at-parse-time `tag` makes it
+    impossible for T8 to ever reject `clippath` while accepting `clipPath`
+    against a foreign element, since both selector strings parse to the same
+    AST value. Resolved by adding a `rawTag` field alongside `tag` (`null`
+    together with it for `*`/no type selector): `tag` stays lowercased for
+    HTML-element matching, `rawTag` preserves the author's exact casing for
+    T8 to compare against a foreign element's `rawName`. Applied to
+    `lib/selector-parser.js` and its `Compound` JSDoc typedef; no test
+    changes needed since existing tests didn't assert on the compound's tag
+    fields exhaustively.
 - Actual files changed: `lib/selector-parser.js` (new), `mod.js` (added the
   `SelectorSyntaxError` export), `test/unit-tests/lib/selector-parser.test.js`
   (new).
