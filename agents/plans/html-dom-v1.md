@@ -908,7 +908,7 @@ Record the actual files changed in the handoff notes.
 
 ### Task T6: innerHTML and outerHTML serialize the tree back to HTML
 
-**Status:** Not started
+**Status:** Complete
 **Depends on:** T4, T5
 **Documentation:** MDN Element.innerHTML and Element.outerHTML
 
@@ -999,12 +999,36 @@ Record the actual files changed in the handoff notes.
 
 **Progress and handoff**
 
-- Completed: Nothing yet.
-- Current state: Not started.
-- Remaining: Everything described above.
-- Decisions and discoveries: None yet.
-- Actual files changed: None yet.
-- Validation run: None yet.
+- Completed: `lib/serialize.js` (`serializeInnerHTML`/`serializeOuterHTML`,
+  the two escapers, an iterative stack-based tree walk), and `innerHTML`/
+  `outerHTML` getters plus an internal `getAttributesForSerialization()` on
+  `lib/element.js`. Unit tests covering both escapers, raw-text
+  non-escaping, void elements, foreign casing, quote normalization, comment
+  round-tripping, and a 10000-element-deep serialization without a stack
+  overflow.
+- Current state: Done.
+- Remaining: Nothing for this task.
+- Decisions and discoveries: The public `attributes`/`getAttributeNames()`
+  API on `Element` (from T4) intentionally exposes only lowercase attribute
+  names, so serialization — the one place that needs an author's original
+  `viewBox` casing back — reaches it through a new internal
+  `getAttributesForSerialization()` method, the same "internal: called only
+  by X" convention already used for `appendChild`/`setParentNode`. This
+  keeps `element.js -> serialize.js` a one-directional dependency: serialize
+  doesn't need to import `Element` or `Text`/`Comment` at all, since it only
+  ever touches `nodeType`, `childNodes`, `localName`, `isForeign`, and the
+  new accessor — plain duck typing, so there's no import cycle with
+  `element.js` to worry about, unlike node.js/element.js in T4.
+- Actual files changed: `lib/serialize.js` (new), `lib/element.js` (edited:
+  added imports, `innerHTML`, `outerHTML`,
+  `getAttributesForSerialization()`), `test/unit-tests/lib/serialize.test.js`
+  (new).
+- Validation run: `npm run lint` (clean), `node run-tests.js` (114 tests
+  passing across the whole suite), `deno run --allow-read run-tests.js` (114
+  passing), `deno lint` (clean, 24 files), `npm pack --dry-run` (lib/
+  contents include serialize.js), and manual smoke tests for escaping,
+  round-tripping, and the 10000-deep case before writing them up as real
+  tests.
 - Blockers: None.
 
 
